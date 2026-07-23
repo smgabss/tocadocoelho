@@ -92,7 +92,8 @@ const App = {
     showPlayerDashboard: async (initialUser) => {
         UI.renderLoading("Entrando na Toca...");
         try {
-            const vantagens = await DB.getVantagens();
+            // Inicialmente busca as vantagens do jogador
+            const vantagens = await DB.getVantagens(initialUser.id);
             
             // Listen para alterações em tempo real dos pontos e dados do jogador logado
             AppState.unsubscribeUserListener = DB.listenUser(initialUser.id, (realtimeUser) => {

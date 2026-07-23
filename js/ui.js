@@ -3,6 +3,14 @@
  * Criação da interface DOM, injetando no `#app`
  */
 
+const playerNames = {
+    'O Revoltado': 'Oliver (Sol)',
+    'A Angustiada': 'Nemes1s (Lua)',
+    'A Sanguessuga': 'Eliza (Sam)',
+    'O Pilantra': 'Kenan (Gab)',
+    'A Oráculo': 'Echo (Mari)'
+};
+
 const UI = {
     container: null,
     
@@ -81,7 +89,7 @@ const UI = {
                 <header class="flex justify-between items-center py-6 mb-8 border-b border-white/10">
                     <div>
                         <h1 class="text-3xl font-bold uppercase tracking-widest text-highlight">${user.codinome}</h1>
-                        <p class="text-white/50 text-sm mt-1">Jogador(a)</p>
+                        <p class="text-white/50 text-sm mt-1">${playerNames[user.codinome] || "Jogador(a)"}</p>
                     </div>
                     <div class="flex gap-4 items-center">
                         <div class="card !p-4 flex items-center gap-3">
@@ -95,7 +103,7 @@ const UI = {
                 </header>
 
                 <main>
-                    <h2 class="text-2xl font-bold mb-6 text-white/90">Loja Sombria</h2>
+                    <h2 class="text-2xl font-bold mb-6 text-white/90">Teia de Sangue</h2>
                     ${vantagens.length === 0 ? '<p class="text-white/50">Nenhuma vantagem disponível momento.</p>' : ''}
                     <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
                         ${vantagens.map(v => {
@@ -196,6 +204,12 @@ const UI = {
                         <div class="card mb-6 mb-8 border-white/10 !bg-black/20">
                             <h3 class="font-bold text-sm text-mestre-orange mb-3 uppercase tracking-wider">Criar Nova Vantagem</h3>
                             <form id="form-vantagem" class="space-y-4">
+                                <div>
+                                    <select id="v-ownerId" class="input-field !py-2 !text-sm" required>
+                                        <option value="">Atribuir a um Jogador...</option>
+                                        ${jogadores.map(j => `<option value="${j.id}">${j.codinome}</option>`).join('')}
+                                    </select>
+                                </div>
                                 <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
                                     <input id="v-nome" class="input-field !py-2 !text-sm" placeholder="Nome" required />
                                     <input id="v-tipo" class="input-field !py-2 !text-sm" placeholder="Tipo (Passiva, Ação...)" required />
@@ -210,13 +224,17 @@ const UI = {
 
                         <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
                             ${vantagens.length === 0 ? '<p class="text-white/30">Nenhuma vantagem cadastrada.</p>' : ''}
-                            ${vantagens.map(v => `
+                            ${vantagens.map(v => {
+                                const owner = jogadores.find(j => j.id === v.ownerId);
+                                const ownerName = owner ? owner.codinome : 'Desconhecido';
+                                return `
                                 <div class="card !p-4 flex flex-col justify-between border-white/5">
                                     <div>
                                         <div class="flex justify-between items-start">
                                             <h4 class="font-bold text-white">${v.nome}</h4>
                                             <span class="text-xs bg-white/10 px-1 rounded">${v.tipo}</span>
                                         </div>
+                                        <p class="text-[10px] text-mestre-orange uppercase tracking-wider mt-1">Para: ${ownerName}</p>
                                         <p class="text-xs text-white/50 mt-1 mb-3">${v.descricao}</p>
                                     </div>
                                     <div class="flex justify-between items-center mt-2 border-t border-white/10 pt-3">
@@ -224,7 +242,7 @@ const UI = {
                                         <button class="text-xs text-red-500 hover:text-red-400 font-bold uppercase delete-vantagem transition-colors" data-id="${v.id}">Excluir</button>
                                     </div>
                                 </div>
-                            `).join('')}
+                                `}).join('')}
                         </div>
                     </div>
                 </div>
@@ -254,6 +272,7 @@ const UI = {
         document.getElementById('form-vantagem').addEventListener('submit', (e) => {
             e.preventDefault();
             actions.onCreateVantagem({
+                ownerId: document.getElementById('v-ownerId').value,
                 nome: document.getElementById('v-nome').value.trim(),
                 tipo: document.getElementById('v-tipo').value.trim(),
                 descricao: document.getElementById('v-desc').value.trim(),

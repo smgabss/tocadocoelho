@@ -61,10 +61,14 @@ window.DB = {
     },
 
     /**
-     * Busca todas as vantagens globais disponíveis na loja
+     * Busca todas as vantagens globais construídas (ou para um jogador)
      */
-    getVantagens: async () => {
-        const snapshot = await db.collection("vantagens").get();
+    getVantagens: async (ownerId = null) => {
+        let query = db.collection("vantagens");
+        if (ownerId) {
+            query = query.where("ownerId", "==", ownerId);
+        }
+        const snapshot = await query.get();
         return snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
     },
 
@@ -72,6 +76,7 @@ window.DB = {
      * CRUD Vantagens (Mestre)
      */
     addVantagem: async (vantagem) => {
+        if (!vantagem.ownerId) throw new Error("A Vantagem precisa estar atrelada a um jogador.");
         await db.collection("vantagens").add(vantagem);
     },
     
