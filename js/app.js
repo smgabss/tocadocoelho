@@ -9,7 +9,7 @@ const AppState = {
 };
 
 window.onload = () => {
-    // Mostra tela de login inicialmente
+    UI.mount(); // Inicializa o container do UI
     App.showLogin();
 };
 
