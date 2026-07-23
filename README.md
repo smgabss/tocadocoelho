@@ -1,7 +1,7 @@
 # Toca do Coelho - Loja de Vantagens
 
 Esta é uma aplicação Single Page Application (SPA) para uma mesa de RPG chamada "Toca do Coelho". Serve como uma loja interativa onde os jogadores podem comprar vantagens usando "Pontos de Sangue", com sincronização em tempo real via Firebase.
-
+<!--
 ## Configuração do Firebase
 
 1. Acesse o [Firebase Console](https://console.firebase.google.com/).
@@ -91,3 +91,4 @@ Para cada usuário, crie um Documento com ID automático na coleção `users` co
 5. Na lateral esquerda, clique em "Pages".
 6. Em "Build and deployment", selecione a branch `main` e a pasta `/ (root)`. Clique em Save.
 7. Após alguns minutos, seu app estará rodando em `<seu-usuario>.github.io/<nome-do-repo>`.
+-->
