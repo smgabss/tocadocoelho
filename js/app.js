@@ -32,7 +32,7 @@ const App = {
                 UI.renderLoading("Autenticando na Toca do Coelho...");
                 const user = await DB.login(codinome, senha);
                 if (user) {
-                    App.handleSuccessfulLogin(user);
+                    App.handleSuccessfulLogin(user, codinome, senha);
                 } else {
                     UI.showToast("Codinome ou senha inválidos.", "error");
                     App.showLogin();
@@ -44,10 +44,20 @@ const App = {
         });
     },
 
-    handleSuccessfulLogin: (user) => {
+    handleSuccessfulLogin: (user, codinome = null, senha = null) => {
         AppState.currentUser = user;
         UI.setTheme(user.theme);
         UI.showToast(`Bem-vindo, ${user.codinome}!`);
+
+        // Pede ao navegador para salvar as credenciais
+        if (codinome && senha && window.PasswordCredential) {
+            const cred = new PasswordCredential({
+                id: codinome,
+                password: senha,
+                name: user.codinome
+            });
+            navigator.credentials.store(cred).catch(() => {});
+        }
 
         if (user.role === 'mestre') {
             App.showMasterDashboard();
