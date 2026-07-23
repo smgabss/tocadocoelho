@@ -53,18 +53,14 @@ const UI = {
                     <form id="login-form" class="space-y-6">
                         <div>
                             <label class="block text-sm font-medium mb-2 text-white/60">Codinome</label>
-                            <input type="text" id="codinome" class="input-field" placeholder="Seu codinome" required autocomplete="off">
+                            <input type="text" id="codinome" name="username" autocomplete="username" class="input-field" placeholder="Seu codinome" required>
                         </div>
                         <div>
                             <label class="block text-sm font-medium mb-2 text-white/60">Senha</label>
-                            <input type="password" id="senha" class="input-field" placeholder="Sua senha secreta" required>
+                            <input type="password" id="senha" name="password" autocomplete="current-password" class="input-field" placeholder="Sua senha secreta" required>
                         </div>
                         <button type="submit" class="w-full btn-primary font-bold uppercase tracking-wider rounded-lg px-4 py-3 transition-all">Acessar</button>
                     </form>
-                </div>
-                
-                <div class="mt-8 text-center text-sm text-white/30 max-w-md">
-                    <p>Caso seja sua primeira vez e não tenha configurado o Firebase, veja as instruções no README.</p>
                 </div>
             </div>
         `;
@@ -98,7 +94,9 @@ const UI = {
                                 <img src="./bloodpoints.webp" alt="Pontos de Sangue" onerror="this.style.display='none';">
                             </div>
                         </div>
-                        <button id="btn-logout" class="text-white/50 hover:text-white uppercase text-sm p-2 transition-colors">Sair</button>
+                        <button id="btn-logout" class="text-white/50 hover:text-white uppercase text-sm p-2 transition-colors">
+                            ${actions.isMasterView ? 'Voltar pro Dashboard' : 'Sair'}
+                        </button>
                     </div>
                 </header>
 
@@ -118,12 +116,14 @@ const UI = {
                                             <h3 class="text-xl font-bold text-white/90">${v.nome}</h3>
                                             <span class="text-xs uppercase px-2 py-1 bg-white/10 rounded text-white/70">${v.tipo}</span>
                                         </div>
-                                        <p class="text-white/60 text-sm mb-6">${v.descricao}</p>
+                                        <p class="text-white/60 text-sm mb-4">${v.descricao}</p>
+                                        ${v.crisUrl ? `<a href="${v.crisUrl}" target="_blank" class="text-xs text-blue-400 hover:text-blue-300 underline mb-4 inline-block">C.R.I.S.</a>` : ''}
                                     </div>
-                                    <button class="w-full font-bold uppercase tracking-wider rounded-lg px-4 py-3 transition-all ${botaoDisabled}" 
+                                    <button class="w-full font-bold uppercase tracking-wider rounded-lg px-4 py-3 transition-all flex items-center justify-center gap-2 ${botaoDisabled}" 
                                             data-id="${v.id}"
                                             ${!podeComprar ? 'disabled title="Você não tem pontos suficientes"' : ''}>
                                         ${textoBotao}
+                                        ${podeComprar ? `<img src="./bloodpoints.webp" class="w-5 h-5 pointer-events-none" onerror="this.style.display='none'">` : ''}
                                     </button>
                                 </div>
                             `;
@@ -136,7 +136,8 @@ const UI = {
                             ${vantagensFeitas.map(v => `
                                 <div class="glass p-4 rounded-lg flex flex-col border border-white/5">
                                     <h3 class="font-bold text-white/80">${v.nome}</h3>
-                                    <p class="text-sm text-white/40 mt-1">${v.descricao}</p>
+                                    <p class="text-sm text-white/40 mt-1 mb-2">${v.descricao}</p>
+                                    ${v.crisUrl ? `<a href="${v.crisUrl}" target="_blank" class="text-xs text-blue-400 hover:text-blue-300 underline">C.R.I.S.</a>` : ''}
                                     <span class="text-xs text-white/20 mt-3 align-bottom">Adquirida em: ${new Date(v.dataCompra).toLocaleString()}</span>
                                 </div>
                             `).join('')}
@@ -182,12 +183,15 @@ const UI = {
                         <div class="flex flex-col gap-4">
                             ${jogadores.length === 0 ? '<p class="text-white/30">Nenhum jogador encontrado.</p>' : ''}
                             ${jogadores.map(j => `
-                                <div class="card !p-4 flex items-center justify-between">
-                                    <div>
-                                        <h3 class="font-bold text-lg text-white">${j.codinome}</h3>
-                                        <p class="text-xs text-white/40">ID: ${j.id}</p>
+                                <div class="card !p-4 flex flex-col justify-between">
+                                    <div class="flex items-center justify-between">
+                                        <div>
+                                            <h3 class="font-bold text-lg text-white">${j.codinome}</h3>
+                                            <p class="text-xs text-white/40">${playerNames[j.codinome] || "Jogador"} - ID: ${j.id}</p>
+                                        </div>
+                                        <button class="btn-view-player w-8 h-8 rounded bg-blue-600/30 hover:bg-blue-600/60 flex items-center justify-center font-bold text-blue-200 transition-colors" data-id="${j.id}" title="Ver Lojinha">&#128065;</button>
                                     </div>
-                                    <div class="flex items-center gap-3">
+                                    <div class="flex items-center gap-3 mt-4 self-end">
                                         <button class="btn-decrease w-8 h-8 rounded bg-white/10 hover:bg-white/20 flex items-center justify-center font-bold text-white transition-colors" data-id="${j.id}" data-current="${j.pontosDeSangue}">-</button>
                                         <input type="number" id="pts-${j.id}" class="w-16 bg-black/50 border border-white/20 rounded pl-2 py-1 text-center font-bold text-mestre-orange pointer-events-none" value="${j.pontosDeSangue}" readonly />
                                         <button class="btn-increase w-8 h-8 rounded bg-white/10 hover:bg-white/20 flex items-center justify-center font-bold text-white transition-colors" data-id="${j.id}" data-current="${j.pontosDeSangue}">+</button>
@@ -214,10 +218,13 @@ const UI = {
                                     <input id="v-nome" class="input-field !py-2 !text-sm" placeholder="Nome" required />
                                     <input id="v-tipo" class="input-field !py-2 !text-sm" placeholder="Tipo (Passiva, Ação...)" required />
                                 </div>
+                                <input type="url" id="v-cris" class="input-field !py-2 !text-sm" placeholder="URL C.R.I.S. (Opcional)" />
                                 <textarea id="v-desc" class="input-field !py-2 !text-sm" placeholder="Descrição da vantagem..." rows="2" required></textarea>
                                 <div class="flex items-center gap-4">
-                                    <input type="number" id="v-custo" min="1" class="input-field !py-2 !text-sm w-32" placeholder="Custo pts" required />
-                                    <button type="submit" class="btn-primary flex-1 py-2 font-bold rounded">Gravar no Banco</button>
+                                    <input type="number" id="v-custo" min="1" class="input-field !py-2 !text-sm w-32" placeholder="Custo" required />
+                                    <input type="hidden" id="v-edit-id" value="" />
+                                    <button type="submit" id="btn-submit-v" class="btn-primary flex-1 py-2 font-bold rounded">Gravar no Banco</button>
+                                    <button type="button" id="btn-cancel-v" class="hidden text-white/50 hover:text-white px-2">Cancelar</button>
                                 </div>
                             </form>
                         </div>
@@ -235,11 +242,15 @@ const UI = {
                                             <span class="text-xs bg-white/10 px-1 rounded">${v.tipo}</span>
                                         </div>
                                         <p class="text-[10px] text-mestre-orange uppercase tracking-wider mt-1">Para: ${ownerName}</p>
-                                        <p class="text-xs text-white/50 mt-1 mb-3">${v.descricao}</p>
+                                        <p class="text-xs text-white/50 mt-1">${v.descricao}</p>
+                                        ${v.crisUrl ? `<a href="${v.crisUrl}" target="_blank" class="text-xs text-blue-400 hover:text-blue-300 underline mt-2 inline-block">C.R.I.S.</a>` : ''}
                                     </div>
-                                    <div class="flex justify-between items-center mt-2 border-t border-white/10 pt-3">
-                                        <span class="text-sm font-bold text-mestre-orange">${v.custo} Pontos</span>
-                                        <button class="text-xs text-red-500 hover:text-red-400 font-bold uppercase delete-vantagem transition-colors" data-id="${v.id}">Excluir</button>
+                                    <div class="flex justify-between items-center mt-3 border-t border-white/10 pt-3">
+                                        <span class="text-sm font-bold text-mestre-orange flex items-center gap-1">${v.custo} <img src="./bloodpoints.webp" class="w-4 h-4"></span>
+                                        <div class="flex gap-3">
+                                            <button class="text-xs text-blue-400 hover:text-blue-300 font-bold uppercase edit-vantagem transition-colors" data-v='${JSON.stringify(v)}'>Editar</button>
+                                            <button class="text-xs text-red-500 hover:text-red-400 font-bold uppercase delete-vantagem transition-colors" data-id="${v.id}">Excluir</button>
+                                        </div>
                                     </div>
                                 </div>
                                 `}).join('')}
@@ -268,16 +279,48 @@ const UI = {
         document.querySelectorAll('.btn-decrease').forEach(b => b.addEventListener('click', e => handlePointChange(e, false)));
         document.querySelectorAll('.btn-increase').forEach(b => b.addEventListener('click', e => handlePointChange(e, true)));
 
-        // Create Vantagem Form
+        // Create / Edit Vantagem Form
         document.getElementById('form-vantagem').addEventListener('submit', (e) => {
             e.preventDefault();
-            actions.onCreateVantagem({
+            const editId = document.getElementById('v-edit-id').value;
+            const payload = {
                 ownerId: document.getElementById('v-ownerId').value,
                 nome: document.getElementById('v-nome').value.trim(),
                 tipo: document.getElementById('v-tipo').value.trim(),
+                crisUrl: document.getElementById('v-cris').value.trim(),
                 descricao: document.getElementById('v-desc').value.trim(),
                 custo: parseInt(document.getElementById('v-custo').value)
-            });
+            };
+            
+            if (editId) {
+                actions.onEditVantagem(editId, payload);
+            } else {
+                actions.onCreateVantagem(payload);
+            }
+        });
+        
+        document.getElementById('btn-cancel-v').addEventListener('click', (e) => {
+            document.getElementById('form-vantagem').reset();
+            document.getElementById('v-edit-id').value = "";
+            document.getElementById('btn-submit-v').innerText = "Gravar no Banco";
+            e.target.classList.add('hidden');
+        });
+
+        // Edit Button Populate
+        document.querySelectorAll('.edit-vantagem').forEach(b => {
+             b.addEventListener('click', e => {
+                 const v = JSON.parse(e.target.getAttribute('data-v'));
+                 document.getElementById('v-ownerId').value = v.ownerId;
+                 document.getElementById('v-nome').value = v.nome;
+                 document.getElementById('v-tipo').value = v.tipo;
+                 document.getElementById('v-cris').value = v.crisUrl || "";
+                 document.getElementById('v-desc').value = v.descricao;
+                 document.getElementById('v-custo').value = v.custo;
+                 document.getElementById('v-edit-id').value = v.id;
+                 document.getElementById('btn-submit-v').innerText = "Atualizar Vantagem";
+                 document.getElementById('btn-cancel-v').classList.remove('hidden');
+                 window.scrollTo({ top: 0, behavior: 'smooth' });
+             });
         });
 
         // Delete Vantagem
@@ -286,6 +329,15 @@ const UI = {
                  if(confirm("Tem certeza que quer apagar essa Vantagem do Catálogo?")) {
                      actions.onDeleteVantagem(e.target.getAttribute('data-id'));
                  }
+             });
+        });
+        
+        // Enter Player View
+        document.querySelectorAll('.btn-view-player').forEach(b => {
+             b.addEventListener('click', e => {
+                 const id = e.target.getAttribute('data-id');
+                 const player = jogadores.find(j => j.id === id);
+                 if(player) actions.onViewPlayer(player);
              });
         });
     },

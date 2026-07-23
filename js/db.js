@@ -80,6 +80,11 @@ window.DB = {
         await db.collection("vantagens").add(vantagem);
     },
     
+    editVantagem: async (id, vantagem) => {
+        if (!vantagem.ownerId) throw new Error("A Vantagem precisa estar atrelada a um jogador.");
+        await db.collection("vantagens").doc(id).update(vantagem);
+    },
+    
     deleteVantagem: async (vantagemId) => {
         await db.collection("vantagens").doc(vantagemId).delete();
     },

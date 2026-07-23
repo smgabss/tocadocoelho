@@ -9,9 +9,6 @@ const AppState = {
 };
 
 window.onload = () => {
-    // Inicialização da interface
-    UI.mount();
-    
     // Mostra tela de login inicialmente
     App.showLogin();
 };
@@ -73,9 +70,18 @@ const App = {
                     UI.showToast('Pontos atualizados!');
                     App.showMasterDashboard(); // Reload simples no painel admin
                 },
+                onViewPlayer: (player) => {
+                    // Mestre entra na visão do jogador
+                    App.showPlayerDashboard(player, true);
+                },
                 onCreateVantagem: async (v) => {
                     await DB.addVantagem(v);
                     UI.showToast('Nova vantagem criada!');
+                    App.showMasterDashboard();
+                },
+                onEditVantagem: async (id, v) => {
+                    await DB.editVantagem(id, v);
+                    UI.showToast('Vantagem alterada!');
                     App.showMasterDashboard();
                 },
                 onDeleteVantagem: async (id) => {
@@ -89,18 +95,24 @@ const App = {
         }
     },
 
-    showPlayerDashboard: async (initialUser) => {
+    showPlayerDashboard: async (initialUser, isMasterView = false) => {
         UI.renderLoading("Entrando na Toca...");
         try {
+            // Se o mestre estiver visualizando, ainda usamos o ID do jogador
+            let targetUserId = initialUser.id;
+            
             // Inicialmente busca as vantagens do jogador
-            const vantagens = await DB.getVantagens(initialUser.id);
+            const vantagens = await DB.getVantagens(targetUserId);
             
             // Listen para alterações em tempo real dos pontos e dados do jogador logado
-            AppState.unsubscribeUserListener = DB.listenUser(initialUser.id, (realtimeUser) => {
-                AppState.currentUser = realtimeUser; // mantém estado global atualizado
+            // Se for visão do mestre, tecnicamente nao devemos misturar o AppState.currentUser 
+            // mas pro funcionamento da tela serve como um mockup de currentUser = targetUser
+            AppState.unsubscribeUserListener = DB.listenUser(targetUserId, (realtimeUser) => {
+                if (!isMasterView) AppState.currentUser = realtimeUser; 
                 
                 UI.renderPlayerDashboard(realtimeUser, vantagens, {
-                    onLogout: App.showLogin,
+                    isMasterView,
+                    onLogout: isMasterView ? App.showMasterDashboard : App.showLogin,
                     onBuy: (vantagem) => {
                         // Action de comprar -> Abre modal
                         UI.showConfirmModal(
