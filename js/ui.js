@@ -220,10 +220,22 @@ const UI = {
                             <h3 class="font-bold text-sm text-mestre-orange mb-3 uppercase tracking-wider">Criar Nova Vantagem</h3>
                             <form id="form-vantagem" class="space-y-4">
                                 <div>
-                                    <select id="v-ownerId" class="input-field !py-2 !text-sm" required>
-                                        <option value="">Atribuir a um Jogador...</option>
-                                        ${jogadores.map(j => `<option value="${j.id}">${j.codinome}</option>`).join('')}
-                                    </select>
+                                    <div id="custom-owner-select" class="relative select-none">
+                                        <button type="button" id="v-owner-btn"
+                                            class="input-field !py-2 !text-sm flex justify-between items-center w-full text-left"
+                                            data-value="">
+                                            <span id="v-owner-label" class="text-white/50">Atribuir a um Jogador...</span>
+                                            <svg class="w-4 h-4 text-white/40 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"/></svg>
+                                        </button>
+                                        <input type="hidden" id="v-ownerId" required>
+                                        <ul id="v-owner-list" class="hidden absolute z-50 w-full mt-1 rounded-lg border border-white/20 overflow-hidden shadow-2xl"
+                                            style="background:#0d0d0d;">
+                                            <li class="px-3 py-2 text-white/40 text-sm cursor-default italic">Selecione um jogador...</li>
+                                            ${jogadores.map(j => `
+                                                <li class="px-3 py-2 text-sm text-white hover:bg-white/10 cursor-pointer transition-colors" data-id="${j.id}" data-label="${j.codinome}">${j.codinome}</li>
+                                            `).join('')}
+                                        </ul>
+                                    </div>
                                 </div>
                                 <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
                                     <input id="v-nome" class="input-field !py-2 !text-sm" placeholder="Nome" required />
@@ -313,15 +325,50 @@ const UI = {
         document.getElementById('btn-cancel-v').addEventListener('click', (e) => {
             document.getElementById('form-vantagem').reset();
             document.getElementById('v-edit-id').value = "";
+            document.getElementById('v-ownerId').value = "";
+            document.getElementById('v-owner-label').textContent = "Atribuir a um Jogador...";
+            document.getElementById('v-owner-label').className = 'text-white/50';
             document.getElementById('btn-submit-v').innerText = "Gravar no Banco";
             e.target.classList.add('hidden');
         });
+
+        // Custom Dropdown Logic
+        const ownerBtn = document.getElementById('v-owner-btn');
+        const ownerList = document.getElementById('v-owner-list');
+        const ownerLabel = document.getElementById('v-owner-label');
+        const ownerInput = document.getElementById('v-ownerId');
+
+        ownerBtn.addEventListener('click', () => {
+            ownerList.classList.toggle('hidden');
+        });
+
+        ownerList.querySelectorAll('li[data-id]').forEach(li => {
+            li.addEventListener('click', () => {
+                ownerInput.value = li.dataset.id;
+                ownerLabel.textContent = li.dataset.label;
+                ownerLabel.className = 'text-white';
+                ownerList.classList.add('hidden');
+            });
+        });
+
+        // Fecha ao clicar fora
+        document.addEventListener('click', (e) => {
+            if (!document.getElementById('custom-owner-select')?.contains(e.target)) {
+                ownerList?.classList.add('hidden');
+            }
+        }, { once: false });
 
         // Edit Button Populate
         document.querySelectorAll('.edit-vantagem').forEach(b => {
              b.addEventListener('click', e => {
                  const v = JSON.parse(e.target.getAttribute('data-v'));
+                 // Popula hidden input e label do custom dropdown
                  document.getElementById('v-ownerId').value = v.ownerId;
+                 const matchOption = document.querySelector(`#v-owner-list li[data-id="${v.ownerId}"]`);
+                 if (matchOption) {
+                     document.getElementById('v-owner-label').textContent = matchOption.dataset.label;
+                     document.getElementById('v-owner-label').className = 'text-white';
+                 }
                  document.getElementById('v-nome').value = v.nome;
                  document.getElementById('v-tipo').value = v.tipo;
                  document.getElementById('v-cris').value = v.crisUrl || "";
