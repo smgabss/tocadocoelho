@@ -4,6 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Toca do Coelho - Loja de Vantagens</title>
+    <link rel="icon" type="image/png" href="./rock2.png">
     <!-- Tailwind CSS CDN -->
     <script src="https://cdn.tailwindcss.com"></script>
     <script>
@@ -55,7 +56,8 @@
     <style type="text/tailwindcss">
         @layer utilities {
             .glass {
-                @apply bg-black/40 backdrop-blur-md border border-white/10;
+                @apply backdrop-blur-md border border-white/10;
+                background-color: rgba(5,5,5,0.7);
             }
         }
         
@@ -80,52 +82,53 @@
             background: rgba(255, 255, 255, 0.4);
         }
 
-        /* Theming Classes */
-        body.theme-mestre { @apply bg-mestre-bg; } /* 1f2937 */
+        /* Theming Classes - Escurecidos */
+        body.theme-mestre { @apply bg-[#080808]; }
         body.theme-mestre::-webkit-scrollbar-thumb { background: theme('colors.mestre.orange'); }
-        body.theme-mestre .card { @apply border-mestre-brown shadow-[0_0_15px_rgba(234,88,12,0.3)]; }
+        body.theme-mestre .card { @apply border-mestre-brown shadow-[0_0_15px_rgba(234,88,12,0.1)]; }
         body.theme-mestre .btn-primary { @apply bg-mestre-orange hover:bg-orange-500 text-white; }
         body.theme-mestre .text-highlight { @apply text-mestre-orange; }
 
-        body.theme-a-oraculo { @apply bg-gray-950; }
+        body.theme-a-oraculo { @apply bg-[#050505]; }
         body.theme-a-oraculo::-webkit-scrollbar-thumb { background: theme('colors.oraculo.blue'); }
-        body.theme-a-oraculo .card { @apply border-oraculo-border shadow-[0_0_15px_rgba(191,219,254,0.1)]; }
+        body.theme-a-oraculo .card { @apply border-oraculo-border shadow-[0_0_15px_rgba(191,219,254,0.05)]; }
         body.theme-a-oraculo .btn-primary { @apply bg-oraculo-blue text-gray-900 hover:bg-blue-300 font-bold; }
         body.theme-a-oraculo .text-highlight { @apply text-oraculo-blue; }
 
         body.theme-a-sanguessuga { @apply bg-black; }
         body.theme-a-sanguessuga::-webkit-scrollbar-thumb { background: theme('colors.sanguessuga.darkred'); }
-        body.theme-a-sanguessuga .card { @apply border-sanguessuga-darkred shadow-[0_0_15px_rgba(220,38,38,0.2)]; }
+        body.theme-a-sanguessuga .card { @apply border-sanguessuga-darkred shadow-[0_0_15px_rgba(220,38,38,0.1)]; }
         body.theme-a-sanguessuga .btn-primary { @apply bg-sanguessuga-red hover:bg-red-500 text-white; }
         body.theme-a-sanguessuga .text-highlight { @apply text-sanguessuga-red; }
 
-        body.theme-o-pilantra { @apply bg-gray-950; }
+        body.theme-o-pilantra { @apply bg-[#050505]; }
         body.theme-o-pilantra::-webkit-scrollbar-thumb { background: theme('colors.pilantra.purple'); }
-        body.theme-o-pilantra .card { @apply border-pilantra-bg shadow-[0_0_15px_rgba(168,85,247,0.2)]; }
+        body.theme-o-pilantra .card { @apply border-pilantra-bg shadow-[0_0_15px_rgba(168,85,247,0.1)]; }
         body.theme-o-pilantra .btn-primary { @apply bg-pilantra-purple hover:bg-purple-400 text-white; }
         body.theme-o-pilantra .text-highlight { @apply text-pilantra-purple; }
 
-        body.theme-a-angustiada { @apply bg-gray-950; }
+        body.theme-a-angustiada { @apply bg-[#050505]; }
         body.theme-a-angustiada::-webkit-scrollbar-thumb { background: theme('colors.angustiada.orange'); }
-        body.theme-a-angustiada .card { @apply border-angustiada-bg shadow-[0_0_15px_rgba(249,115,22,0.2)]; }
+        body.theme-a-angustiada .card { @apply border-angustiada-bg shadow-[0_0_15px_rgba(249,115,22,0.1)]; }
         body.theme-a-angustiada .btn-primary { @apply bg-angustiada-orange hover:bg-orange-400 text-white; }
         body.theme-a-angustiada .text-highlight { @apply text-angustiada-orange; }
 
-        body.theme-o-revoltado { @apply bg-black; }
+        body.theme-o-revoltado { @apply bg-[#050505]; }
         body.theme-o-revoltado::-webkit-scrollbar-thumb { background: theme('colors.revoltado.red'); }
-        body.theme-o-revoltado .card { @apply border-revoltado-red shadow-[0_0_15px_rgba(239,68,68,0.3)]; border-image: linear-gradient(to right, #ef4444, #ef4444, #9333ea) 1; }
+        body.theme-o-revoltado .card { @apply border-revoltado-red shadow-[0_0_15px_rgba(239,68,68,0.1)]; border-image: linear-gradient(to right, #ef4444, #ef4444, #9333ea) 1; }
         body.theme-o-revoltado .btn-primary { @apply bg-gradient-to-r from-revoltado-red via-revoltado-red to-revoltado-purple text-white hover:opacity-90; }
         body.theme-o-revoltado .text-highlight { @apply text-transparent bg-clip-text bg-gradient-to-r from-revoltado-red via-revoltado-red to-revoltado-purple; }
 
         /* Default fallback Theme */
-        body.theme-default { @apply bg-gray-900; }
-        body.theme-default .card { @apply border-gray-700; }
+        body.theme-default { @apply bg-[#080808]; }
+        body.theme-default .card { @apply border-gray-900; }
         body.theme-default .btn-primary { @apply bg-gray-700 hover:bg-gray-600; }
-        body.theme-default .text-highlight { @apply text-gray-300; }
+        body.theme-default .text-highlight { @apply text-gray-500; }
 
         /* Base styles for forms and cards */
         .card {
-            @apply glass rounded-xl p-6 transition-all duration-300 hover:-translate-y-1 hover:shadow-lg border-2;
+            @apply glass rounded-xl p-6 transition-all duration-300 hover:-translate-y-1 hover:shadow-[0_8px_30px_rgb(0,0,0,0.4)] border-2;
+            background-color: rgba(5,5,5,0.7);
         }
         
         .input-field {

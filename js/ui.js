@@ -37,6 +37,7 @@ const UI = {
         UI.clear();
         const html = `
             <div class="flex flex-col items-center justify-center flex-1 h-full min-h-[60vh] animate-pulse">
+                <img src="./rock2.png" alt="Loading" class="w-16 h-16 drop-shadow-md mb-4 opacity-50">
                 <h1 class="text-3xl font-bold tracking-widest text-white/50 uppercase">Toca do Coelho</h1>
                 <p class="text-white/30 mt-2">${msg}</p>
             </div>
@@ -48,6 +49,10 @@ const UI = {
         UI.clear();
         const html = `
             <div class="flex-1 flex flex-col items-center justify-center py-12 px-4 animate-fade-in">
+                <div class="text-center mb-8 flex flex-col items-center justify-center">
+                    <img src="./rock2.png" alt="Toca do Coelho Logo" class="w-16 h-16 drop-shadow-2xl mb-4 pointer-events-none">
+                    <h1 class="text-4xl font-bold tracking-widest text-white uppercase" style="text-shadow: 0 0 20px rgba(255,255,255,0.2);">Toca do Coelho</h1>
+                </div>
                 <div class="card w-full max-w-sm">
                     <h2 class="text-2xl font-bold text-center mb-8 uppercase tracking-wider text-white">Entrar na Toca</h2>
                     <form id="login-form" class="space-y-6">
@@ -83,9 +88,12 @@ const UI = {
         const html = `
             <div class="w-full animate-fade-in pb-20">
                 <header class="flex justify-between items-center py-6 mb-8 border-b border-white/10">
-                    <div>
-                        <h1 class="text-3xl font-bold uppercase tracking-widest text-highlight">${user.codinome}</h1>
-                        <p class="text-white/50 text-sm mt-1">${playerNames[user.codinome] || "Jogador(a)"}</p>
+                    <div class="flex items-center gap-5">
+                        <img src="./rock2.png" alt="Logo" class="w-14 h-14 drop-shadow-xl hidden md:block" onerror="this.style.display='none'">
+                        <div>
+                            <h1 class="text-3xl font-bold uppercase tracking-widest text-highlight">${user.codinome}</h1>
+                            <p class="text-white/50 text-sm mt-1">${playerNames[user.codinome] || "Jogador(a)"}</p>
+                        </div>
                     </div>
                     <div class="flex gap-4 items-center">
                         <div class="card !p-4 flex items-center gap-3">
@@ -169,9 +177,12 @@ const UI = {
         const html = `
             <div class="w-full animate-fade-in pb-20">
                 <header class="flex justify-between items-center py-6 mb-8 border-b border-mestre-brown/30">
-                    <div>
-                        <h1 class="text-3xl font-bold uppercase tracking-widest text-mestre-orange">Painel do Mestre</h1>
-                        <p class="text-white/50 text-sm mt-1">Gerenciamento de Campanha</p>
+                    <div class="flex items-center gap-5">
+                        <img src="./rock2.png" alt="Logo" class="w-14 h-14 drop-shadow-xl hidden md:block" onerror="this.style.display='none'">
+                        <div>
+                            <h1 class="text-3xl font-bold uppercase tracking-widest text-mestre-orange">Painel do Mestre</h1>
+                            <p class="text-white/50 text-sm mt-1">Gerenciamento de Campanha</p>
+                        </div>
                     </div>
                     <button id="btn-logout-mestre" class="text-white/50 hover:text-white uppercase text-sm p-2">Sair</button>
                 </header>
