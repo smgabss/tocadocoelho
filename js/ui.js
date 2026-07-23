@@ -87,7 +87,7 @@ const UI = {
                         <div class="card !p-4 flex items-center gap-3">
                             <span class="text-3xl font-bold text-highlight">${user.pontosDeSangue}</span>
                             <div class="w-8 h-8 rounded-full bg-red-900/30 flex items-center justify-center">
-                                <img src="./blood-icon.png" alt="Pontos de Sangue" onerror="this.src='data:image/svg+xml;utf8,<svg xmlns=%22http://www.w3.org/2000/svg%22 fill=%22red%22 viewBox=%220 0 24 24%22><path d=%22M12 21.5c-4.136 0-7.5-3.364-7.5-7.5 0-2.828 2.05-5.918 6.04-9.08.384-.306.936-.306 1.32 0 3.99 3.162 6.04 6.252 6.04 9.08 0 4.136-3.364 7.5-7.5 7.5z%22/></svg>'">
+                                <img src="./bloodpoints.webp" alt="Pontos de Sangue" onerror="this.style.display='none';">
                             </div>
                         </div>
                         <button id="btn-logout" class="text-white/50 hover:text-white uppercase text-sm p-2 transition-colors">Sair</button>
