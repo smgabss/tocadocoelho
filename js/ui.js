@@ -156,7 +156,7 @@ const UI = {
                                     <p class="text-sm text-white/40 mt-1 mb-2">${v.descricao}</p>
                                     ${v.crisUrl ? `<a href="${v.crisUrl}" target="_blank" class="text-xs text-blue-400 hover:text-blue-300 underline mb-1">C.R.I.S.</a>` : ''}
                                     <span class="text-[10px] text-white/20 mt-1 mb-2 align-bottom">Adquirida em: ${new Date(v.dataCompra).toLocaleString()}</span>
-                                    ${actions.isMasterView ? `<button class="w-full btn-devolver mt-2 bg-red-900/40 hover:bg-red-900/80 border border-red-500/30 text-white/80 text-xs font-bold py-1.5 rounded transition-colors" data-v='${JSON.stringify({ ...v, descricao: v.descricao.replace(/'/g, "&apos;") })}'>Estornar / Devolver</button>` : ''}
+                                    ${actions.isMasterView ? `<button class="w-full btn-devolver mt-2 bg-red-900/40 hover:bg-red-900/80 border border-red-500/30 text-white/80 text-xs font-bold py-1.5 rounded transition-colors" data-v='${JSON.stringify({ ...v, descricao: (v.descricao || "").replace(/'/g, "&apos;") })}'>Estornar / Devolver</button>` : ''}
                                 </div>
                             `).join('')}
                         </div>
@@ -297,7 +297,7 @@ const UI = {
                                             <button class="text-xl toggle-lock-vantagem transition-opacity hover:opacity-70" data-id="${v.id}" data-locked="${Boolean(v.isLocked)}" title="${v.isLocked ? 'Vantagem trancada. Clique para libertar.' : 'Vantagem livre. Clique para bloquear.'}">
                                                 ${v.isLocked ? '🔒' : '🔓'}
                                             </button>
-                                            <button class="text-xs text-blue-400 hover:text-blue-300 font-bold uppercase edit-vantagem transition-colors" data-v='${JSON.stringify({ ...v, descricao: v.descricao.replace(/'/g, "&apos;"), preRequisito: (v.preRequisito||'').replace(/'/g, "&apos;") })}'>Editar</button>
+                                            <button class="text-xs text-blue-400 hover:text-blue-300 font-bold uppercase edit-vantagem transition-colors" data-v='${JSON.stringify({ ...v, descricao: (v.descricao || "").replace(/'/g, "&apos;"), preRequisito: (v.preRequisito||'').replace(/'/g, "&apos;") })}'>Editar</button>
                                             <button class="text-xs text-red-500 hover:text-red-400 font-bold uppercase delete-vantagem transition-colors" data-id="${v.id}">Excluir</button>
                                         </div>
                                     </div>
