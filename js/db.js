@@ -77,7 +77,10 @@ window.DB = {
      */
     addVantagem: async (vantagem) => {
         if (!vantagem.ownerId) throw new Error("A Vantagem precisa estar atrelada a um jogador.");
-        await db.collection("vantagens").add(vantagem);
+        await db.collection("vantagens").add({
+            ...vantagem,
+            isLocked: vantagem.isLocked || false
+        });
     },
     
     editVantagem: async (id, vantagem) => {
@@ -85,8 +88,41 @@ window.DB = {
         await db.collection("vantagens").doc(id).update(vantagem);
     },
     
+    toggleLockVantagem: async (id, isLocked) => {
+        await db.collection("vantagens").doc(id).update({ isLocked });
+    },
+    
     deleteVantagem: async (vantagemId) => {
         await db.collection("vantagens").doc(vantagemId).delete();
+    },
+
+    /**
+     * Devolve uma vantagem já comprada pelo jogador.
+     * Restaura os pontos, remove da lista dele e recria na coleção global de compra.
+     */
+    devolverVantagem: async (userId, currentPoints, currentVantagens, vantagem) => {
+        if (!vantagem) throw new Error("Vantagem não encontrada para estorno.");
+
+        const novosVantagens = currentVantagens.filter((v) => v.id !== vantagem.id);
+        const newPoints = currentPoints + (vantagem.custo || 0);
+
+        // Remove do inventario e extorna
+        await db.collection("users").doc(userId).update({
+            pontosDeSangue: newPoints,
+            vantagens: novosVantagens
+        });
+
+        // Recria na Teia de Sangue mantendo as info (exceto data de compra)
+        await db.collection("vantagens").add({
+            nome: vantagem.nome,
+            descricao: vantagem.descricao || "",
+            tipo: vantagem.tipo || "",
+            custo: vantagem.custo,
+            crisUrl: vantagem.crisUrl || null,
+            preRequisito: vantagem.preRequisito || "",
+            isLocked: vantagem.isLocked || false,
+            ownerId: userId
+        });
     },
 
     /**
@@ -107,5 +143,8 @@ window.DB = {
             pontosDeSangue: newPoints,
             vantagens: updatedVantagens
         });
+
+        // Apaga a vantagem da listagem publica para nao comprarem de novo
+        await db.collection("vantagens").doc(vantagem.id).delete();
     }
 };

@@ -113,23 +113,32 @@ const UI = {
                     ${vantagens.length === 0 ? '<p class="text-white/50">Nenhuma vantagem disponível momento.</p>' : ''}
                     <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
                         ${vantagens.map(v => {
-                            const podeComprar = temSaldo(v.custo);
-                            const botaoDisabled = !podeComprar ? 'opacity-50 cursor-not-allowed' : 'btn-primary';
-                            const textoBotao = !podeComprar ? 'Sangue Insuficiente' : `Comprar - ${v.custo} pts`;
+                            const isLocked = v.isLocked === true;
+                            const podeComprar = temSaldo(v.custo) && !isLocked;
+                            const botaoDisabled = (!podeComprar || isLocked) ? 'opacity-50 cursor-not-allowed' : 'btn-primary bg-[#050505]';
+                            const textoBotao = isLocked ? 'Bloqueado' : (!temSaldo(v.custo) ? 'Sangue Insuficiente' : `Comprar - ${v.custo} pts`);
+                            const cardOpacity = isLocked ? 'opacity-60 grayscale-[50%]' : '';
                             
                             return `
-                                <div class="card flex flex-col justify-between">
+                                <div class="card flex flex-col justify-between ${cardOpacity}">
                                     <div>
                                         <div class="flex justify-between items-start mb-2">
                                             <h3 class="text-xl font-bold text-white/90">${v.nome}</h3>
                                             <span class="text-xs uppercase px-2 py-1 bg-white/10 rounded text-white/70">${v.tipo}</span>
                                         </div>
-                                        <p class="text-white/60 text-sm mb-4">${v.descricao}</p>
-                                        ${v.crisUrl ? `<a href="${v.crisUrl}" target="_blank" class="text-xs text-blue-400 hover:text-blue-300 underline mb-4 inline-block">C.R.I.S.</a>` : ''}
+                                        ${isLocked ? `
+                                            <div class="flex flex-col items-center justify-center my-6">
+                                                <img src="./cadeado.png" class="w-12 h-12 opacity-80 mb-3" onerror="this.style.display='none'">
+                                                ${v.preRequisito ? `<p class="text-mestre-orange text-xs text-center border border-mestre-orange/30 rounded p-1.5 w-full bg-black/40">Pré-Requisito: ${v.preRequisito}</p>` : ''}
+                                            </div>
+                                        ` : `
+                                            <p class="text-white/60 text-sm mb-4 min-h-[4rem]">${v.descricao}</p>
+                                            ${v.crisUrl ? `<a href="${v.crisUrl}" target="_blank" class="text-xs text-blue-400 hover:text-blue-300 underline mb-4 inline-block">C.R.I.S.</a>` : ''}
+                                        `}
                                     </div>
                                     <button class="w-full font-bold uppercase tracking-wider rounded-lg px-4 py-3 transition-all flex items-center justify-center gap-2 ${botaoDisabled}" 
                                             data-id="${v.id}"
-                                            ${!podeComprar ? 'disabled title="Você não tem pontos suficientes"' : ''}>
+                                            ${!podeComprar ? 'disabled title="Você não pode comprar esta Vantagem agora"' : ''}>
                                         ${textoBotao}
                                         ${podeComprar ? `<img src="./bloodpoints.webp" class="w-5 h-5 pointer-events-none" onerror="this.style.display='none'">` : ''}
                                     </button>
@@ -142,11 +151,12 @@ const UI = {
                         <h2 class="text-2xl font-bold mt-16 mb-6 text-highlight">Suas Vantagens Adquiridas</h2>
                         <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
                             ${vantagensFeitas.map(v => `
-                                <div class="glass p-4 rounded-lg flex flex-col border border-white/5">
+                                <div class="glass p-4 rounded-lg flex flex-col border border-white/5 relative">
                                     <h3 class="font-bold text-white/80">${v.nome}</h3>
                                     <p class="text-sm text-white/40 mt-1 mb-2">${v.descricao}</p>
-                                    ${v.crisUrl ? `<a href="${v.crisUrl}" target="_blank" class="text-xs text-blue-400 hover:text-blue-300 underline">C.R.I.S.</a>` : ''}
-                                    <span class="text-xs text-white/20 mt-3 align-bottom">Adquirida em: ${new Date(v.dataCompra).toLocaleString()}</span>
+                                    ${v.crisUrl ? `<a href="${v.crisUrl}" target="_blank" class="text-xs text-blue-400 hover:text-blue-300 underline mb-1">C.R.I.S.</a>` : ''}
+                                    <span class="text-[10px] text-white/20 mt-1 mb-2 align-bottom">Adquirida em: ${new Date(v.dataCompra).toLocaleString()}</span>
+                                    ${actions.isMasterView ? `<button class="w-full btn-devolver mt-2 bg-red-900/40 hover:bg-red-900/80 border border-red-500/30 text-white/80 text-xs font-bold py-1.5 rounded transition-colors" data-v='${JSON.stringify({ ...v, descricao: v.descricao.replace(/'/g, "&apos;") })}'>Estornar / Devolver</button>` : ''}
                                 </div>
                             `).join('')}
                         </div>
@@ -168,6 +178,16 @@ const UI = {
                     if(vantagem) actions.onBuy(vantagem);
                 });
             }
+        });
+
+        // Click Devolver (somente se master view)
+        document.querySelectorAll('.btn-devolver').forEach(btn => {
+            btn.addEventListener('click', (e) => {
+                const v = JSON.parse(e.target.getAttribute('data-v'));
+                if(confirm(`Devolver ${v.nome}? Os pontos voltarão para o inventário do jogador.`)) {
+                    if (actions.onDevolver) actions.onDevolver(v);
+                }
+            });
         });
     },
 
@@ -241,7 +261,10 @@ const UI = {
                                     <input id="v-nome" class="input-field !py-2 !text-sm" placeholder="Nome" required />
                                     <input id="v-tipo" class="input-field !py-2 !text-sm" placeholder="Tipo (Passiva, Ação...)" required />
                                 </div>
-                                <input type="url" id="v-cris" class="input-field !py-2 !text-sm" placeholder="URL C.R.I.S. (Opcional)" />
+                                <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                                    <input type="text" id="v-pre" class="input-field !py-2 !text-sm flex-grow" placeholder="Pré-Requisito (Opcional)" />
+                                    <input type="url" id="v-cris" class="input-field !py-2 !text-sm" placeholder="URL C.R.I.S. (Opcional)" />
+                                </div>
                                 <textarea id="v-desc" class="input-field !py-2 !text-sm" placeholder="Descrição da vantagem..." rows="2" required></textarea>
                                 <div class="flex items-center gap-4">
                                     <input type="number" id="v-custo" min="1" class="input-field !py-2 !text-sm w-32" placeholder="Custo" required />
@@ -271,7 +294,10 @@ const UI = {
                                     <div class="flex justify-between items-center mt-3 border-t border-white/10 pt-3">
                                         <span class="text-sm font-bold text-mestre-orange flex items-center gap-1">${v.custo} <img src="./bloodpoints.webp" class="w-4 h-4"></span>
                                         <div class="flex gap-3">
-                                            <button class="text-xs text-blue-400 hover:text-blue-300 font-bold uppercase edit-vantagem transition-colors" data-v='${JSON.stringify(v)}'>Editar</button>
+                                            <button class="text-xl toggle-lock-vantagem transition-opacity hover:opacity-70" data-id="${v.id}" data-locked="${Boolean(v.isLocked)}" title="${v.isLocked ? 'Vantagem trancada. Clique para libertar.' : 'Vantagem livre. Clique para bloquear.'}">
+                                                ${v.isLocked ? '🔒' : '🔓'}
+                                            </button>
+                                            <button class="text-xs text-blue-400 hover:text-blue-300 font-bold uppercase edit-vantagem transition-colors" data-v='${JSON.stringify({ ...v, descricao: v.descricao.replace(/'/g, "&apos;"), preRequisito: (v.preRequisito||'').replace(/'/g, "&apos;") })}'>Editar</button>
                                             <button class="text-xs text-red-500 hover:text-red-400 font-bold uppercase delete-vantagem transition-colors" data-id="${v.id}">Excluir</button>
                                         </div>
                                     </div>
@@ -311,6 +337,7 @@ const UI = {
                 nome: document.getElementById('v-nome').value.trim(),
                 tipo: document.getElementById('v-tipo').value.trim(),
                 crisUrl: document.getElementById('v-cris').value.trim(),
+                preRequisito: document.getElementById('v-pre').value.trim(),
                 descricao: document.getElementById('v-desc').value.trim(),
                 custo: parseInt(document.getElementById('v-custo').value)
             };
@@ -372,6 +399,7 @@ const UI = {
                  document.getElementById('v-nome').value = v.nome;
                  document.getElementById('v-tipo').value = v.tipo;
                  document.getElementById('v-cris').value = v.crisUrl || "";
+                 document.getElementById('v-pre').value = v.preRequisito || "";
                  document.getElementById('v-desc').value = v.descricao;
                  document.getElementById('v-custo').value = v.custo;
                  document.getElementById('v-edit-id').value = v.id;
@@ -387,6 +415,15 @@ const UI = {
                  if(confirm("Tem certeza que quer apagar essa Vantagem do Catálogo?")) {
                      actions.onDeleteVantagem(e.target.getAttribute('data-id'));
                  }
+             });
+        });
+
+        // Toggle Lock
+        document.querySelectorAll('.toggle-lock-vantagem').forEach(b => {
+             b.addEventListener('click', e => {
+                 const id = e.currentTarget.getAttribute('data-id');
+                 const isLocked = e.currentTarget.getAttribute('data-locked') === 'true';
+                 actions.onToggleLock(id, !isLocked);
              });
         });
         

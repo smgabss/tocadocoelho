@@ -98,6 +98,11 @@ const App = {
                     await DB.deleteVantagem(id);
                     UI.showToast('Vantagem excluída!');
                     App.showMasterDashboard();
+                },
+                onToggleLock: async (id, isLocked) => {
+                    await DB.toggleLockVantagem(id, isLocked);
+                    UI.showToast(isLocked ? 'Vantagem trancada!' : 'Vantagem destrancada!');
+                    App.showMasterDashboard();
                 }
             });
         } catch (err) {
@@ -132,12 +137,42 @@ const App = {
                                 try {
                                     await DB.comprarVantagem(realtimeUser.id, realtimeUser.pontosDeSangue, realtimeUser.vantagens, vantagem);
                                     UI.showToast(`${vantagem.nome} comprada com sucesso!`, "success");
-                                    // A tela será re-renderizada automaticamente pelo FireStore Listener (onSnapshot)!
+                                    // Comprar apaga do global. Precisamos forçar o recarregamento total da tela (que refaz o getVantagens) para que o card da teia de sangue suma de vez
+                                    if(AppState.unsubscribeUserListener) AppState.unsubscribeUserListener();
+                                    App.showPlayerDashboard(initialUser, isMasterView);
                                 } catch(e) {
                                     UI.showToast(e.message, "error");
                                 }
                             }
                         )
+                    },
+                     onDevolver: async (vantagem) => {
+                          try {
+                              UI.renderLoading("Processando devolução...");
+                              await DB.devolverVantagem(realtimeUser.id, realtimeUser.pontosDeSangue, realtimeUser.vantagens, vantagem);
+                              UI.showToast(`O valor de ${vantagem.nome} foi reembolsado e trancado novamente!`, "success");
+                              
+                              if(AppState.unsubscribeUserListener) AppState.unsubscribeUserListener();
+                              App.showPlayerDashboard(initialUser, isMasterView);
+                          } catch (e) {
+                              UI.showToast(e.message, "error");
+                          }
+                     },
+                     onRefund: (vantagemNome, vantagemIndex) => {
+                        // Só disponível para o mestre
+                        UI.showConfirmModal(
+                            `Estornar Vantagem`,
+                            `Deseja estornar [${vantagemNome}]? Os Pontos de Sangue serão devolvidos e a vantagem voltará para a Teia de Sangue.`,
+                            async () => {
+                                try {
+                                    await DB.estornarVantagem(realtimeUser.id, realtimeUser.pontosDeSangue, realtimeUser.vantagens, vantagemIndex);
+                                    UI.showToast(`${vantagemNome} estornada! Pontos devolvidos.`, "success");
+                                    // Firestore listener re-renderiza automaticamente
+                                } catch(e) {
+                                    UI.showToast(e.message, "error");
+                                }
+                            }
+                        );
                     }
                 });
             });
